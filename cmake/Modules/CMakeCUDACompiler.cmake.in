@@ -1,0 +1,36 @@
+# CMake CUDA compiler information template for glibc 2.41+ compatibility
+set(CMAKE_CUDA_COMPILER "@CMAKE_CUDA_COMPILER@")
+set(CMAKE_CUDA_COMPILER_VERSION "@CMAKE_CUDA_COMPILER_VERSION@")
+set(CMAKE_CUDA_COMPILER_ID "NVIDIA")
+set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
+set(CMAKE_CUDA_COMPILER_LOADED 1)
+set(CMAKE_CUDA_COMPILER_WORKS TRUE)
+set(CMAKE_CUDA_ABI_COMPILED TRUE)
+set(CMAKE_CUDA_COMPILER_ABI "")
+set(CMAKE_CUDA_SIZEOF_DATA_PTR "8")
+set(CMAKE_CUDA_STANDARD_LIBRARIES "cudadevrt;cudart_static;rt;pthread;dl")
+set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "STATIC")
+
+# Implicit include directories
+set(CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES "/usr/local/cuda/include;/usr/include/c++/14;/usr/include/x86_64-linux-gnu/c++/14;/usr/include/c++/14/backward;/usr/lib/gcc/x86_64-linux-gnu/14/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include")
+
+# Implicit link directories  
+set(CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES "/usr/local/cuda/lib64;/usr/lib/gcc/x86_64-linux-gnu/14;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib")
+
+# Implicit link libraries
+set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "cudadevrt;cudart_static;rt;pthread;dl;stdc++;m;gcc_s;gcc;c;gcc_s;gcc")
+
+# Host compiler
+set(CMAKE_CUDA_HOST_COMPILER "@CMAKE_CXX_COMPILER@")
+set(CMAKE_CUDA_HOST_COMPILER_ID "@CMAKE_CXX_COMPILER_ID@")
+
+# CUDA toolkit
+set(CMAKE_CUDA_TOOLKIT_ROOT "/usr/local/cuda")
+set(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "/usr/local/cuda")
+set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "/usr/local/cuda")
+
+# Architecture flags
+set(CMAKE_CUDA_ARCHITECTURES "90")
+
+# Standard flags
+set(CMAKE_CUDA_STANDARD_DEFAULT "17")

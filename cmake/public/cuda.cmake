@@ -1,5 +1,8 @@
 # ---[ cuda
 
+# Include the glibc compatibility module
+include(${CMAKE_CURRENT_LIST_DIR}/../Modules/CUDAGlibcCompat.cmake)
+
 # Poor man's include guard
 if(TARGET torch::cudart)
   return()
@@ -8,6 +11,9 @@ endif()
 # sccache is only supported in CMake master and not in the newest official
 # release (3.11.3) yet. Hence we need our own Modules_CUDA_fix to enable sccache.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../Modules_CUDA_fix)
+
+# Check if we need glibc 2.41+ compatibility fixes
+cuda_glibc_compat_check()
 
 # We don't want to statically link cudart, because we rely on it's dynamic linkage in
 # python (follow along torch/cuda/__init__.py and usage of cudaGetErrorName).
@@ -44,6 +50,10 @@ set(CUDAToolkit_ROOT "${CUDA_TOOLKIT_ROOT_DIR}")
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set(CMAKE_CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}")
 endif()
+
+# Apply glibc compatibility fixes before enabling CUDA language
+apply_cuda_glibc_compat()
+
 enable_language(CUDA)
 if("X${CMAKE_CUDA_STANDARD}" STREQUAL "X" )
   set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})

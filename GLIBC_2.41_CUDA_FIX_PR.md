@@ -24,43 +24,44 @@ This affects:
 
 ## Solution
 
-This PR implements a three-part solution:
+This PR implements an nvcc wrapper-based solution:
 
 1. **CMake Detection Module** (`cmake/Modules/CUDAGlibcCompat.cmake`):
    - Detects glibc version at configure time
-   - Creates wrapper headers to prevent conflicts
-   - Configures CUDA compiler settings appropriately
+   - Creates an nvcc wrapper script that injects compatibility headers
+   - Sets CMAKE_CUDA_COMPILER to use the wrapper
 
-2. **Compatibility Header** (`aten/src/ATen/cuda/CUDAMathCompat.h`):
-   - Provides device/host compatible implementations of conflicting functions
-   - Ensures correct function resolution in both CUDA and host code
-
-3. **Build System Integration** (modifications to `cmake/public/cuda.cmake`):
+2. **Build System Integration** (modifications to `cmake/public/cuda.cmake`):
    - Integrates the compatibility module into PyTorch's build system
    - Applies fixes before CUDA language is enabled
 
+The wrapper script approach ensures that all CUDA compilations, including CMake's compiler identification test, work correctly with glibc 2.41+.
+
 ## Implementation Details
 
-### Wrapper Headers
+### NVCC Wrapper Script
 
-The solution creates wrapper headers that intercept problematic includes:
+The solution creates a wrapper script that:
+- Intercepts all nvcc invocations
+- Creates temporary compatibility headers that rename conflicting functions
+- Injects these headers via `-I` flag before system headers
+- Cleans up temporary files after compilation
 
-- `bits/mathcalls.h` - Prevents glibc from declaring conflicting functions when compiling CUDA code
-- `crt/math_functions.h` - Manages the interaction between CUDA and glibc math functions
+### Wrapper Header Strategy
 
-### Math Function Compatibility
-
-The `CUDAMathCompat.h` header provides inline implementations that:
-- Use CUDA's built-in functions in device code (`__device__`)
-- Compute equivalent values using standard math in host code (`__host__`)
+The wrapper creates a `bits/mathcalls.h` that:
+- Detects CUDA compilation via `__CUDACC__` 
+- Temporarily renames `sinpi`, `cospi`, `sinpif`, `cospif` during preprocessing
+- Includes the real system header with conflicts avoided
+- Restores the original names for CUDA's use
 
 ### CMake Integration
 
 The CMake module:
 1. Checks for glibc 2.41+ on Linux systems
-2. Sets up include paths for wrapper headers
-3. Adds necessary compiler flags (`-allow-unsupported-compiler`)
-4. Defines preprocessor macros for conditional compilation
+2. Creates the nvcc wrapper script in the build directory
+3. Sets `CMAKE_CUDA_COMPILER` to use the wrapper
+4. Adds necessary compiler flags (`-allow-unsupported-compiler`)
 
 ## Testing
 
@@ -74,9 +75,7 @@ The fix allows PyTorch to build successfully with full CUDA support.
 
 ## Files Changed
 
-- `cmake/Modules/CUDAGlibcCompat.cmake` (new) - Compatibility detection and setup
-- `cmake/Modules/CMakeCUDACompiler.cmake.in` (new) - Template for CUDA compiler info
-- `aten/src/ATen/cuda/CUDAMathCompat.h` (new) - Math function compatibility header  
+- `cmake/Modules/CUDAGlibcCompat.cmake` (new) - Compatibility detection and nvcc wrapper creation
 - `cmake/public/cuda.cmake` (modified) - Integration points
 
 ## Backward Compatibility
